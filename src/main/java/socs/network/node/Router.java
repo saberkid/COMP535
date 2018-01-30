@@ -1,5 +1,6 @@
 package socs.network.node;
 
+import socs.network.service.Client;
 import socs.network.service.Server;
 import socs.network.util.Configuration;
 
@@ -13,8 +14,15 @@ public class Router {
   Server server;
   RouterDescription rd;
 
+
   //assuming that all routers are with 4 ports
   Link[] ports = new Link[4];
+  Client[] clients = new Client[4];
+  boolean isStarted = false;
+
+
+
+
 
   public RouterDescription getRd() {
     return rd;
@@ -25,14 +33,6 @@ public class Router {
     lsd = new LinkStateDatabase(rd);
 
   }
-
-  /**
-   * output the shortest path to the given destination ip
-   * <p/>
-   * format: source ip address  -> ip address -> ... -> destination ip
-   *
-   * @param destinationIP the ip adderss of the destination simulated service
-   */
   private boolean addLink(Link link){
     for (int i = 0; i < ports.length; ++i) {
       if (ports[i] == null) {
@@ -42,6 +42,14 @@ public class Router {
     }
     return false;
   }
+  /**
+   * output the shortest path to the given destination ip
+   * <p/>
+   * format: source ip address  -> ip address -> ... -> destination ip
+   *
+   * @param destinationIP the ip adderss of the destination simulated service
+   */
+
   private void processDetect(String destinationIP) {
 
   }
@@ -79,23 +87,30 @@ public class Router {
    * broadcast Hello to neighbors
    */
   private void processStart() {
-
-    for (int i = 0; i < ports.length; ++i) {
-      if (!isConnected(i)){
-        startConnection(i);
-      }
+    if (isStarted){
+      System.out.println("Router already started");
+      return;
     }
+    for (int i = 0; i < ports.length; ++i) {
+      startConnection(i);
+
+    }
+    isStarted = true;
   }
 
   private void startConnection(int i) {
+    if (ports[i] == null)
+      return;
 
+    Link link = ports[i];
+    RouterDescription remoteDescription = link.router1.simulatedIPAddress.equals(rd.simulatedIPAddress) ? link.router2 : link.router1;
+    Client client = new Client(this, remoteDescription, link);
+    clients[i] = client;
+    client.getThreading().start();
 
   }
 
-  private boolean isConnected(int i){
-    boolean isConnectedi = false;
-    return isConnectedi;
-  }
+
   /**
    * attach the link to the remote service, which is identified by the given simulated ip;
    * to establish the connection via socket, you need to indentify the process IP and process Port;
@@ -125,7 +140,7 @@ public class Router {
   public void terminal() {
     try {
       server = new Server(this);
-      server.getRunner().start();
+      server.getThreading().start();
 
 
       InputStreamReader isReader = new InputStreamReader(System.in);
