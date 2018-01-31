@@ -7,6 +7,9 @@ import socs.network.util.Configuration;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import static socs.network.node.RouterStatus.INIT;
+import static socs.network.node.RouterStatus.TWO_WAY;
+
 
 public class Router {
 
@@ -128,6 +131,24 @@ public class Router {
    */
   private void processNeighbors() {
 
+    for (int i=0; i < 4; i++){
+      if (ports[i] == null){
+        continue;
+      }
+      Link link = ports[i];
+      RouterDescription neighborRd = link.router1.simulatedIPAddress.equals(rd.simulatedIPAddress) ? link.router2 : link.router1;
+      RouterStatus neighborStatus = neighborRd.getStatus();
+
+
+      /*switch (neighborStatus){
+        case INIT:
+      }*/
+
+      if (neighborStatus == TWO_WAY){
+        System.out.println("IP Address of the neighbor" + (i+1) + ": " + neighborRd.getSimulatedIPAddress());
+      }
+
+    }
   }
 
   /**
