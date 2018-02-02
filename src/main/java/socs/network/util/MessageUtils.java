@@ -8,7 +8,7 @@ import java.io.ObjectOutputStream;
 
 
 /**
- * Created by aoshi on 2018/1/29.
+ *
  */
 public class MessageUtils {
     public static String resolveMessage(SOSPFPacket messageReceived){

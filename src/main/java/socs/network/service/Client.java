@@ -12,6 +12,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+/**
+ *
+ */
 public class Client implements Runnable{
     private Router router;
     private RouterDescription rd;
@@ -38,9 +41,7 @@ public class Client implements Runnable{
 
     public void run() {
         try {
-            //System.out.println("Connecting to " + remoteRouterIP + "...");
             clientSocket = new Socket(remoteRd.getProcessIPAddress(), remoteRd.getProcessPortNumber());
-            //System.out.println("Just connected to " + remoteRouterIP + "...");
 
             outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
             inputStream = new ObjectInputStream(clientSocket.getInputStream());
@@ -49,7 +50,7 @@ public class Client implements Runnable{
             MessageUtils.sendMessage(messageHello, outputStream);
 
             SOSPFPacket receivedPacket = MessageUtils.receivePacket(inputStream);
-            //TODO add LD to database
+            //TODO Add to Link state database
             remoteRd.setStatus(RouterStatus.TWO_WAY);
             MessageUtils.sendMessage(messageHello, outputStream);
 

@@ -7,6 +7,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
+/**
+ *
+ */
 public class Server implements Runnable{
     private ServerSocket serverSocket;
     private Thread threading;
@@ -23,9 +26,6 @@ public class Server implements Runnable{
     }
 
 
-
-
-
     public void run() {
         try {
             serverSocket = new ServerSocket(router.getRd().getProcessPortNumber());
@@ -37,21 +37,15 @@ public class Server implements Runnable{
             try {
                 int freePortNumber = getFreePortNumber();
                 if (freePortNumber != -1) {
-                    System.out.println("Waiting for client on port " +
-                            serverSocket.getLocalPort() + "...");
+                    System.out.println("Waiting for client on port " + freePortNumber);
                     Socket server = serverSocket.accept();
-                    Thread clientHandlerThread = new ClientHandler(server, this.router).getThreading();
-                    clientHandlerThread.start();
+                    ClientHandler clientHandler = new ClientHandler(server, this.router);
+                    clientHandlers[freePortNumber] = clientHandler;
+                    clientHandler.getThreading().start();
 
-
-                    /*System.out.println("Just connected to " + server.getRemoteSocketAddress());
-                    DataInputStream in = new DataInputStream(server.getInputStream());
-
-                    System.out.println(in.readUTF());
-                    DataOutputStream out = new DataOutputStream(server.getOutputStream());
-                    out.writeUTF("Thank you for connecting to " + server.getLocalSocketAddress()
-                            + "\nGoodbye!");*/
-                    //server.close();
+                }
+                else{
+                    //System.out.println("All ports are occupied");
                 }
 
             } catch (SocketTimeoutException s) {

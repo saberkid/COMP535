@@ -1,4 +1,5 @@
 package socs.network.service;
+import socs.network.message.LSA;
 import socs.network.message.SOSPFPacket;
 import socs.network.node.Router;
 import socs.network.node.RouterDescription;
@@ -7,8 +8,11 @@ import socs.network.util.MessageUtils;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Vector;
 
-
+/**
+ *
+ */
 public class ClientHandler implements Runnable{
 
     private Socket clientSocket;
@@ -39,7 +43,7 @@ public class ClientHandler implements Runnable{
                 switch (receivedPacket.sospfType){
                     case SOSPFPacket.HELLO:
 
-                        // TODO LDU
+
                         if (remoteRd == null){
                             remoteRd = new RouterDescription(receivedPacket.srcProcessIP, receivedPacket.srcProcessPort, receivedPacket.srcIP);
                             remoteRd.setStatus(RouterStatus.INIT);
@@ -49,6 +53,7 @@ public class ClientHandler implements Runnable{
                         else
                         {
                             remoteRd.setStatus(RouterStatus.TWO_WAY);
+                            // TODO LDU
                         }
                         break;
                     default:
@@ -63,4 +68,6 @@ public class ClientHandler implements Runnable{
         }
 
     }
+
+
 }
