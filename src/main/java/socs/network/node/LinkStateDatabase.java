@@ -2,7 +2,7 @@ package socs.network.node;
 
 import socs.network.message.LSA;
 import socs.network.message.LinkDescription;
-import socs.network.util.WeighedGraph;
+import socs.network.util.WeightedGraph;
 import socs.network.util.Vertex;
 import java.util.HashMap;
 
@@ -26,11 +26,17 @@ public class LinkStateDatabase {
     //TODO: fill the implementation here
     return null;
   }
-  private String dijkstra(WeighedGraph graph, Vertex source ){
+//  private String dijkstra(WeighedGraph graph, Vertex source ){
+//
+//    //TODO
+//    return null;
+//  }
+  private String dijkstra(WeightedGraph graph){
 
-    //TODO
-    return null;
-  }
+	    //TODO
+	    return null;
+	  }
+  
   //initialize the linkstate database by adding an entry about the service itself
   private LSA initLinkStateDatabase() {
     LSA lsa = new LSA();
