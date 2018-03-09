@@ -26,7 +26,6 @@ public class RouterDescription {
     this.processIPAddress = processIPAddress;
     this.processPortNumber = processPortNumber;
     this.simulatedIPAddress = simulatedIPAddress;
-    //this.status = RouterStatus.INIT;
   }
 
   public void setStatus(RouterStatus status) {

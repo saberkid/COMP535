@@ -46,12 +46,14 @@ public class Client implements Runnable{
             outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
             inputStream = new ObjectInputStream(clientSocket.getInputStream());
 
-            SOSPFPacket messageHello = MessageUtils.packMessage(SOSPFPacket.HELLO, rd, remoteRd);
+            SOSPFPacket messageHello = MessageUtils.packMessage(SOSPFPacket.HELLO, rd, remoteRd, router);
             MessageUtils.sendMessage(messageHello, outputStream);
 
             SOSPFPacket receivedPacket = MessageUtils.receivePacket(inputStream);
-            //TODO Add to Link state database
+            //update Link state database and send lsa with another HELLO
+            router.lsaUpdate(remoteRd, link.getWeight());
             remoteRd.setStatus(RouterStatus.TWO_WAY);
+            messageHello = MessageUtils.packMessage(SOSPFPacket.HELLO, rd, remoteRd, router);
             MessageUtils.sendMessage(messageHello, outputStream);
 
         } catch (Exception e) {

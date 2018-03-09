@@ -42,19 +42,25 @@ public class ClientHandler implements Runnable{
                 SOSPFPacket receivedPacket = MessageUtils.receivePacket(inputStream);
                 switch (receivedPacket.sospfType){
                     case SOSPFPacket.HELLO:
-
-
                         if (remoteRd == null){
                             remoteRd = new RouterDescription(receivedPacket.srcProcessIP, receivedPacket.srcProcessPort, receivedPacket.srcIP);
                             remoteRd.setStatus(RouterStatus.INIT);
-                            SOSPFPacket outMessage = MessageUtils.packMessage(SOSPFPacket.HELLO,router.getRd(), remoteRd );
+                            SOSPFPacket outMessage = MessageUtils.packMessage(SOSPFPacket.HELLO,router.getRd(), remoteRd, router );
                             MessageUtils.sendMessage(outMessage, outputStream);
                         }
                         else
                         {
                             remoteRd.setStatus(RouterStatus.TWO_WAY);
-                            // TODO LDU
+
+                            router.synchronize(receivedPacket.lsaArray);
+                            //  send LDU
+                            SOSPFPacket outMessage = MessageUtils.packMessage(SOSPFPacket.LSU,router.getRd(), remoteRd, router );
+                            MessageUtils.sendMessage(outMessage, outputStream);
+
                         }
+                        break;
+                    case SOSPFPacket.LSU:
+                        //TODO synchronize LSD and propagate
                         break;
                     default:
                         System.out.println("UNKNOWN MESSAGE RECEIVED");

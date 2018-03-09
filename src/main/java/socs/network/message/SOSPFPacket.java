@@ -1,6 +1,7 @@
 package socs.network.message;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,6 +26,6 @@ public class SOSPFPacket implements Serializable {
   public String neighborID; //neighbor's simulated IP address
 
   //used by LSAUPDATE
-  public Vector<LSA> lsaArray = null;
+  public ArrayList<LSA> lsaArray = null;
 
 }

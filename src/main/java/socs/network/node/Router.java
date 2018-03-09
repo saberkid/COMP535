@@ -1,17 +1,24 @@
 package socs.network.node;
 
+import socs.network.message.LSA;
+import socs.network.message.LinkDescription;
 import socs.network.service.Client;
 import socs.network.service.Server;
 import socs.network.util.Configuration;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
+import socs.network.util.WeightedGraph;
+import socs.network.util.WeightedGraph.*;
 import static socs.network.node.RouterStatus.INIT;
 import static socs.network.node.RouterStatus.TWO_WAY;
 
 
 public class Router {
+
+
 
   protected LinkStateDatabase lsd;
   Server server;
@@ -25,7 +32,9 @@ public class Router {
 
 
 
-
+  public LinkStateDatabase getLsd() {
+    return lsd;
+  }
 
   public RouterDescription getRd() {
     return rd;
@@ -54,6 +63,28 @@ public class Router {
    */
 
   private void processDetect(String destinationIP) {
+    // implement detect command
+    ArrayList<Vertex> nodes = new ArrayList<>();
+    ArrayList<Edge> edges = new ArrayList<>();
+
+    lsd._store.forEach((routerIp, lsa) -> nodes.add(new Vertex(routerIp)));
+    lsd._store.forEach((routerIp, lsa) -> {
+      Vertex source = WeightedGraph.findVertex(nodes, routerIp);
+      lsa.links.forEach(ld -> {
+        if (!ld.linkID.equals(routerIp)) {
+          Vertex destination = WeightedGraph.findVertex(nodes, ld.linkID);
+          edges.add(new Edge(source.name, destination.name, ld.tosMetrics ));
+        }
+      });
+    });
+
+    WeightedGraph wGraph = new WeightedGraph(edges);
+    wGraph.dijkstra(rd.getSimulatedIPAddress());
+
+    System.out.print(rd.getSimulatedIPAddress());
+    for (Vertex vertex: wGraph.getGraph().values()){
+      System.out.println("-> (" + vertex.dist + ")" + vertex.name );
+    }
 
   }
 
@@ -157,7 +188,46 @@ public class Router {
   private void processQuit() {
 
   }
+  public void lsaUpdate(RouterDescription remoteRd, short weight){
+    LinkDescription linkDescription = new LinkDescription(remoteRd.getSimulatedIPAddress(), remoteRd.getProcessPortNumber(), weight);
+    LSA lsa = lsd._store.get(rd.simulatedIPAddress);
+    boolean isLinkFound = false;
 
+    // check if link description already exists. If so, override.
+    for (int i = 0; i < lsa.links.size(); ++i) {
+      LinkDescription ld = lsa.links.get(i);
+
+      if (ld.linkID.equals(remoteRd.getSimulatedIPAddress())) {
+        ld = linkDescription;
+        isLinkFound = true;
+      }
+    }
+
+    if (!isLinkFound) {
+      lsa.links.add(linkDescription);
+      ++lsa.lsaSeqNumber;
+    }
+
+  }
+  // synchronize LSA
+  public void synchronize(ArrayList<LSA> lsaArray) {
+      for (LSA lsa: lsaArray){
+        if (isLsaOutdated(lsa)) {
+          lsd._store.put(lsa.linkStateID, lsa);
+        }
+      }
+  }
+  public void synchronizeAndPropogate(ArrayList<LSA> lsaArray) {
+    // TODO synchronized and propogate the mesaage
+  }
+  // check if the new LSA is outdated
+  private boolean isLsaOutdated(LSA newLsa) {
+    boolean isOutdated = true;
+    if (lsd._store.containsKey(newLsa.linkStateID) && lsd._store.get(newLsa.linkStateID).lsaSeqNumber >= newLsa.lsaSeqNumber) {
+      isOutdated = false;
+    }
+    return isOutdated;
+  }
   public void terminal() {
     try {
       server = new Server(this);

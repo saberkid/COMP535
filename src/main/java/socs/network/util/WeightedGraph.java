@@ -39,8 +39,14 @@ import java.util.*;
 //}
  
 public class WeightedGraph {
-	private final Map<String, Vertex> graph; // mapping of vertex names to Vertex objects, built from a set of Edges
+
+
+    private Map<String, Vertex> graph; // mapping of vertex names to Vertex objects, built from a set of Edges
 	/** One edge of the graph (only used by Graph constructor) */
+
+    public Map<String, Vertex> getGraph() {
+        return graph;
+    }
 	public static class Edge {
 		public final String v1, v2;
 		public final int dist;
@@ -50,7 +56,17 @@ public class WeightedGraph {
 			this.dist = dist;
 		}
 	}
- 
+ 	public static Vertex findVertex(ArrayList<Vertex> list, String routerIp){
+	    Vertex found = null;
+		for(Vertex v: list){
+		    if(v.name.equals(routerIp)) {
+                found = v;
+                break;
+            }
+		}
+        return found;
+
+	}
 	/** One vertex of the graph, complete with mappings to neighbouring vertices */
 	public static class Vertex implements Comparable<Vertex>{
 		public final String name;
@@ -87,9 +103,10 @@ public class WeightedGraph {
 		}
 	}
  
-   /** Builds a graph from a set of edges */
-	public WeightedGraph(Edge[] edges) {
-		graph = new HashMap<>(edges.length);
+   /** Builds a graph from a set of edges
+    * @param edges*/
+	public WeightedGraph(ArrayList<Edge> edges) {
+		graph = new HashMap<>();
  
 		//one pass to find all vertices
 		for (Edge e : edges) {

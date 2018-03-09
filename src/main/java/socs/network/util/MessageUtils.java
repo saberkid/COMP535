@@ -1,6 +1,7 @@
 package socs.network.util;
 
 import socs.network.message.SOSPFPacket;
+import socs.network.node.Router;
 import socs.network.node.RouterDescription;
 
 import java.io.ObjectInputStream;
@@ -39,7 +40,7 @@ public class MessageUtils {
 
     }
 
-    public static SOSPFPacket packMessage(short type, RouterDescription local, RouterDescription remote ){
+    public static SOSPFPacket packMessage(short type, RouterDescription local, RouterDescription remote, Router router ){
         SOSPFPacket message = new SOSPFPacket();
         message.srcProcessIP = local.getProcessIPAddress();
         message.srcProcessPort = local.getProcessPortNumber();
@@ -47,7 +48,7 @@ public class MessageUtils {
         message.dstIP = remote.getSimulatedIPAddress();
         message.sospfType = type;
         message.routerID = local.getSimulatedIPAddress();
-
+        router.getLsd().get_store().forEach((routerIp, lsa) -> message.lsaArray.add(lsa));
         return message;
     }
 

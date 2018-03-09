@@ -8,11 +8,16 @@ import java.util.HashMap;
 
 public class LinkStateDatabase {
 
-  //linkID => LSAInstance
+
+
+    //linkID => LSAInstance
   HashMap<String, LSA> _store = new HashMap<String, LSA>();
 
   private RouterDescription rd = null;
 
+  public HashMap<String, LSA> get_store() {
+        return _store;
+    }
   public LinkStateDatabase(RouterDescription routerDescription) {
     rd = routerDescription;
     LSA l = initLinkStateDatabase();
@@ -26,16 +31,7 @@ public class LinkStateDatabase {
     //TODO: fill the implementation here
     return null;
   }
-//  private String dijkstra(WeighedGraph graph, Vertex source ){
-//
-//    //TODO
-//    return null;
-//  }
-  private String dijkstra(WeightedGraph graph){
 
-	    //TODO
-	    return null;
-	  }
   
   //initialize the linkstate database by adding an entry about the service itself
   private LSA initLinkStateDatabase() {
