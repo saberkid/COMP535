@@ -2,8 +2,7 @@ package socs.network.node;
 
 import socs.network.message.LSA;
 import socs.network.message.LinkDescription;
-import socs.network.util.WeightedGraph;
-import socs.network.util.Vertex;
+
 import java.util.HashMap;
 
 public class LinkStateDatabase {

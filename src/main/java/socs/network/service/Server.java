@@ -14,6 +14,9 @@ public class Server implements Runnable{
     private ServerSocket serverSocket;
     private Thread threading;
     private Router router;
+
+
+
     private ClientHandler[] clientHandlers;
 
     public Server(Router router) {
@@ -25,7 +28,9 @@ public class Server implements Runnable{
         return threading;
     }
 
-
+    public ClientHandler[] getClientHandlers() {
+        return clientHandlers;
+    }
     public void run() {
         try {
             serverSocket = new ServerSocket(router.getRd().getProcessPortNumber());

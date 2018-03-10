@@ -1,6 +1,6 @@
 package socs.network.service;
-import socs.network.message.LSA;
 import socs.network.message.SOSPFPacket;
+import socs.network.node.Link;
 import socs.network.node.Router;
 import socs.network.node.RouterDescription;
 import socs.network.node.RouterStatus;
@@ -8,7 +8,6 @@ import socs.network.util.MessageUtils;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Vector;
 
 /**
  *
@@ -51,17 +50,22 @@ public class ClientHandler implements Runnable{
                         else
                         {
                             remoteRd.setStatus(RouterStatus.TWO_WAY);
-
+                            //update LSA and add link with weight
                             router.synchronize(receivedPacket.lsaArray);
-                            //  send LDU
+                            short weight = MessageUtils.getLinkWeight(router, receivedPacket);
+                            addRouterLink(remoteRd, weight);
+
+                            //  send LDU to all neighbours
                             SOSPFPacket outMessage = MessageUtils.packMessage(SOSPFPacket.LSU,router.getRd(), remoteRd, router );
                             MessageUtils.sendMessage(outMessage, outputStream);
-
+                            router.propagateLspToNbr(router.getRd().getSimulatedIPAddress(), receivedPacket.srcIP);
                         }
                         break;
-                    case SOSPFPacket.LSU:
-                        //TODO synchronize LSD and propagate
+                    case SOSPFPacket.LSU: {
+                        //synchronize LSD and propagate
+                        router.synchronizeAndPropagate(receivedPacket.lsaArray, receivedPacket.lsuStarter, receivedPacket.srcIP);
                         break;
+                    }
                     default:
                         System.out.println("UNKNOWN MESSAGE RECEIVED");
 
@@ -74,6 +78,24 @@ public class ClientHandler implements Runnable{
         }
 
     }
+    public void propagate(){
+        SOSPFPacket message = MessageUtils.packMessage(SOSPFPacket.LSU, router.getRd(), remoteRd, router);
+        MessageUtils.sendMessage(message, outputStream);
+    }
 
+    public boolean isConnectedWith(String remoteIp) {
+        return remoteRd.getSimulatedIPAddress().equals(remoteIp);
+    }
 
+    private boolean addRouterLink(RouterDescription routerAttachedDescription, short weight) {
+        Link link = new Link(router.getRd(), routerAttachedDescription, weight);
+
+        boolean isLinkAdded = router.addLink(link);
+        if (!isLinkAdded) {
+            System.out.println("[ERROR] Router ports full!.");
+            return false;
+        }
+
+        return true;
+    }
 }

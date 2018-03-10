@@ -39,6 +39,7 @@ public class Client implements Runnable{
         this.threading = new Thread(this);
     }
 
+
     public void run() {
         try {
             clientSocket = new Socket(remoteRd.getProcessIPAddress(), remoteRd.getProcessPortNumber());
@@ -56,11 +57,32 @@ public class Client implements Runnable{
             messageHello = MessageUtils.packMessage(SOSPFPacket.HELLO, rd, remoteRd, router);
             MessageUtils.sendMessage(messageHello, outputStream);
 
+            while (true) {
+                receivedPacket = MessageUtils.receivePacket(inputStream);
+
+                switch (receivedPacket.sospfType) {
+
+                    case SOSPFPacket.LSU: {
+                        //System.out.printf("received lsu from"+receivedPacket.srcIP);
+                        router.synchronizeAndPropagate(receivedPacket.lsaArray, receivedPacket.lsuStarter, receivedPacket.srcIP);
+                        break;
+                    }
+                    default:
+                    }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
 
 
+    }
+    public boolean isConnectedWith(String remoteIp) {
+        return remoteRd.getSimulatedIPAddress().equals(remoteIp);
+    }
+
+    public void propagate(){
+        SOSPFPacket message = MessageUtils.packMessage(SOSPFPacket.LSU, rd, remoteRd, router);
+        MessageUtils.sendMessage(message, outputStream);
     }
 }

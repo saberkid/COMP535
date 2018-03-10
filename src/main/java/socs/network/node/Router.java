@@ -3,6 +3,7 @@ package socs.network.node;
 import socs.network.message.LSA;
 import socs.network.message.LinkDescription;
 import socs.network.service.Client;
+import socs.network.service.ClientHandler;
 import socs.network.service.Server;
 import socs.network.util.Configuration;
 
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 
 import socs.network.util.WeightedGraph;
 import socs.network.util.WeightedGraph.*;
-import static socs.network.node.RouterStatus.INIT;
+
 import static socs.network.node.RouterStatus.TWO_WAY;
 
 
@@ -45,7 +46,7 @@ public class Router {
     lsd = new LinkStateDatabase(rd);
 
   }
-  private boolean addLink(Link link){
+  public boolean addLink(Link link){
     for (int i = 0; i < ports.length; ++i) {
       if (ports[i] == null) {
         ports[i] = link;
@@ -81,7 +82,7 @@ public class Router {
     WeightedGraph wGraph = new WeightedGraph(edges);
     wGraph.dijkstra(rd.getSimulatedIPAddress());
 
-    System.out.print(rd.getSimulatedIPAddress());
+    System.out.println(rd.getSimulatedIPAddress());
     for (Vertex vertex: wGraph.getGraph().values()){
       System.out.println("-> (" + vertex.dist + ")" + vertex.name );
     }
@@ -210,18 +211,42 @@ public class Router {
 
   }
   // synchronize LSA
-  public void synchronize(ArrayList<LSA> lsaArray) {
-      for (LSA lsa: lsaArray){
-        if (isLsaOutdated(lsa)) {
+  public boolean synchronize(ArrayList<LSA> lsaArray) {
+    boolean updated = false;
+    for (LSA lsa: lsaArray){
+        if (isLocalLsaOutdated(lsa)) {
+          updated = true;
           lsd._store.put(lsa.linkStateID, lsa);
         }
-      }
+    }
+    return updated;
   }
-  public void synchronizeAndPropogate(ArrayList<LSA> lsaArray) {
+  public void synchronizeAndPropagate(ArrayList<LSA> lsaArray, String lduStarter, String excludedIp) {
     // TODO synchronized and propogate the mesaage
+    boolean canPropogate = synchronize(lsaArray);
+    if(canPropogate){
+      propagateLspToNbr(lduStarter, excludedIp);
+
+    }
+
+
+  }
+  public void propagateLspToNbr(String lduStarter, String excludedIp){
+    for (int i = 0; i < clients.length; ++i) {
+      if (clients[i] != null && !clients[i].isConnectedWith(lduStarter) &&  !clients[i].isConnectedWith(excludedIp)) {
+        clients[i].propagate();
+      }
+    }
+    ClientHandler[] clientServicers = server.getClientHandlers();
+    for (int i = 0; i < clientServicers.length; ++i) {
+      if (clientServicers[i] != null && !clientServicers[i].isConnectedWith(lduStarter) && !clientServicers[i].isConnectedWith(excludedIp)) {
+        clientServicers[i].propagate();
+      }
+    }
+
   }
   // check if the new LSA is outdated
-  private boolean isLsaOutdated(LSA newLsa) {
+  private boolean isLocalLsaOutdated(LSA newLsa) {
     boolean isOutdated = true;
     if (lsd._store.containsKey(newLsa.linkStateID) && lsd._store.get(newLsa.linkStateID).lsaSeqNumber >= newLsa.lsaSeqNumber) {
       isOutdated = false;
