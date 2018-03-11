@@ -74,6 +74,7 @@ public class Router {
       lsa.links.forEach(ld -> {
         if (!ld.linkID.equals(routerIp)) {
           Vertex destination = WeightedGraph.findVertex(nodes, ld.linkID);
+          //System.out.println(source.name+ destination.name+ld.tosMetrics);
           edges.add(new Edge(source.name, destination.name, ld.tosMetrics ));
         }
       });
@@ -245,7 +246,7 @@ public class Router {
     }
 
   }
-  // check if the new LSA is outdated
+  // check if the local LSA is outdated
   private boolean isLocalLsaOutdated(LSA newLsa) {
     boolean isOutdated = true;
     if (lsd._store.containsKey(newLsa.linkStateID) && lsd._store.get(newLsa.linkStateID).lsaSeqNumber >= newLsa.lsaSeqNumber) {

@@ -10,9 +10,9 @@ public class Link {
     return weight;
   }
 
-  public Link(RouterDescription r1, RouterDescription r2, short weight ) {
+  public Link(RouterDescription r1, RouterDescription r2, short linkWeight ) {
     router1 = r1;
     router2 = r2;
-    weight = weight;
+    weight = linkWeight;
   }
 }
