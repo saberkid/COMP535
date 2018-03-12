@@ -195,7 +195,6 @@ public class Router {
     LSA lsa = lsd._store.get(rd.simulatedIPAddress);
     boolean isLinkFound = false;
 
-    // check if link description already exists. If so, override.
     for (int i = 0; i < lsa.links.size(); ++i) {
       LinkDescription ld = lsa.links.get(i);
 
@@ -204,14 +203,16 @@ public class Router {
         isLinkFound = true;
       }
     }
-
+    // if not found, lsaSeqNumber ++
     if (!isLinkFound) {
       lsa.links.add(linkDescription);
       ++lsa.lsaSeqNumber;
     }
 
   }
-  // synchronize LSA
+  /*
+  synchronize LSA
+   */
   public boolean synchronize(ArrayList<LSA> lsaArray) {
     boolean updated = false;
     for (LSA lsa: lsaArray){
@@ -222,8 +223,11 @@ public class Router {
     }
     return updated;
   }
+  /*
+   synchronize and propagate the messages
+    */
   public void synchronizeAndPropagate(ArrayList<LSA> lsaArray, String lduStarter, String excludedIp) {
-    // TODO synchronized and propogate the mesaage
+
     boolean canPropogate = synchronize(lsaArray);
     if(canPropogate){
       propagateLspToNbr(lduStarter, excludedIp);
@@ -232,6 +236,9 @@ public class Router {
 
 
   }
+  /*
+   propagate with exceptions
+    */
   public void propagateLspToNbr(String lduStarter, String excludedIp){
     for (int i = 0; i < clients.length; ++i) {
       if (clients[i] != null && !clients[i].isConnectedWith(lduStarter) &&  !clients[i].isConnectedWith(excludedIp)) {
@@ -246,7 +253,9 @@ public class Router {
     }
 
   }
-  // check if the local LSA is outdated
+  /*
+   check if the local LSA is outdated
+    */
   private boolean isLocalLsaOutdated(LSA newLsa) {
     boolean isOutdated = true;
     if (lsd._store.containsKey(newLsa.linkStateID) && lsd._store.get(newLsa.linkStateID).lsaSeqNumber >= newLsa.lsaSeqNumber) {
