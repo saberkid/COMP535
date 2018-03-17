@@ -51,14 +51,15 @@ public class ClientHandler implements Runnable{
                         {
                             remoteRd.setStatus(RouterStatus.TWO_WAY);
                             //update LSA and add link with weight
-                            router.synchronize(receivedPacket.lsaArray);
+                            //router.synchronize(receivedPacket.lsaArray);
                             short weight = MessageUtils.getLinkWeight(router, receivedPacket);
+                            router.lsaUpdate(remoteRd, weight);
                             addRouterLink(remoteRd, weight);
 
                             //  send LDU to all neighbours
-                            SOSPFPacket outMessage = MessageUtils.packMessage(SOSPFPacket.LSU,router.getRd(), remoteRd, router );
-                            MessageUtils.sendMessage(outMessage, outputStream);
-                            router.propagateLspToNbr(router.getRd().getSimulatedIPAddress(), receivedPacket.srcIP);
+                            /*SOSPFPacket outMessage = MessageUtils.packMessage(SOSPFPacket.LSU, router.getRd(), remoteRd, router );
+                            MessageUtils.sendMessage(outMessage, outputStream);*/
+                            router.propagateLspToNbr(router.getRd().getSimulatedIPAddress(), null);
                         }
                         break;
                     case SOSPFPacket.LSU: {

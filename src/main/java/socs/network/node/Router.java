@@ -30,6 +30,7 @@ public class Router {
   Link[] ports = new Link[4];
   Client[] clients = new Client[4];
   boolean isStarted = false;
+  final Object lsa_lock = new Object();
 
 
 
@@ -83,10 +84,18 @@ public class Router {
     WeightedGraph wGraph = new WeightedGraph(edges);
     wGraph.dijkstra(rd.getSimulatedIPAddress());
 
-    System.out.println(rd.getSimulatedIPAddress());
+    //System.out.println(rd.getSimulatedIPAddress());
+    boolean dIPfound = false;
     for (Vertex vertex: wGraph.getGraph().values()){
-      System.out.println("-> (" + vertex.dist + ")" + vertex.name );
+      //System.out.println("-> (" + vertex.dist + ")" + vertex.name );
+      if(vertex.name.equals(destinationIP)){
+        wGraph.printPath(destinationIP);
+        dIPfound = true;
+        break;
+      }
     }
+    if(!dIPfound)
+      System.out.println("Unknown destination IP address!");
 
   }
 
@@ -199,7 +208,7 @@ public class Router {
       LinkDescription ld = lsa.links.get(i);
 
       if (ld.linkID.equals(remoteRd.getSimulatedIPAddress())) {
-        ld = linkDescription;
+        ld.tosMetrics = linkDescription.tosMetrics;
         isLinkFound = true;
       }
     }
@@ -215,11 +224,13 @@ public class Router {
    */
   public boolean synchronize(ArrayList<LSA> lsaArray) {
     boolean updated = false;
-    for (LSA lsa: lsaArray){
+    synchronized (lsa_lock) {
+      for (LSA lsa : lsaArray) {
         if (isLocalLsaOutdated(lsa)) {
           updated = true;
           lsd._store.put(lsa.linkStateID, lsa);
         }
+      }
     }
     return updated;
   }
@@ -237,18 +248,18 @@ public class Router {
 
   }
   /*
-   propagate with exceptions
+   propagate with exceptions  && !clients[i].isConnectedWith(lduStarter)   && !clientHandlers[i].isConnectedWith(lduStarter)
     */
   public void propagateLspToNbr(String lduStarter, String excludedIp){
     for (int i = 0; i < clients.length; ++i) {
-      if (clients[i] != null && !clients[i].isConnectedWith(lduStarter) &&  !clients[i].isConnectedWith(excludedIp)) {
+      if (clients[i] != null  &&  !clients[i].isConnectedWith(excludedIp)) {
         clients[i].propagate();
       }
     }
-    ClientHandler[] clientServicers = server.getClientHandlers();
-    for (int i = 0; i < clientServicers.length; ++i) {
-      if (clientServicers[i] != null && !clientServicers[i].isConnectedWith(lduStarter) && !clientServicers[i].isConnectedWith(excludedIp)) {
-        clientServicers[i].propagate();
+    ClientHandler[] clientHandlers = server.getClientHandlers();
+    for (int i = 0; i < clientHandlers.length; ++i) {
+      if (clientHandlers[i] != null  && !clientHandlers[i].isConnectedWith(excludedIp)) {
+        clientHandlers[i].propagate();
       }
     }
 
