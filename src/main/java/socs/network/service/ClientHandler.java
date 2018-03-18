@@ -19,10 +19,17 @@ public class ClientHandler implements Runnable{
     private Thread threading;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
+
+
+
     private RouterDescription remoteRd;
 
     public Thread getThreading() {
         return threading;
+    }
+
+    public RouterDescription getRemoteRd() {
+        return remoteRd;
     }
 
     public ClientHandler(Socket clientSocket, Router router) {

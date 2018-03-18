@@ -137,7 +137,9 @@ public class Router {
       return;
     }
     for (int i = 0; i < ports.length; ++i) {
+      if (!isConnected(i)){
       startConnection(i);
+      }
 
     }
     isStarted = true;
@@ -252,17 +254,34 @@ public class Router {
     */
   public void propagateLspToNbr(String lduStarter, String excludedIp){
     for (int i = 0; i < clients.length; ++i) {
-      if (clients[i] != null  &&  !clients[i].isConnectedWith(excludedIp)) {
+      if (clients[i] != null  &&  clients[i].getRemoteRd().status == RouterStatus.TWO_WAY && !clients[i].isConnectedWith(excludedIp)) {
         clients[i].propagate();
       }
     }
     ClientHandler[] clientHandlers = server.getClientHandlers();
     for (int i = 0; i < clientHandlers.length; ++i) {
-      if (clientHandlers[i] != null  && !clientHandlers[i].isConnectedWith(excludedIp)) {
+      if (clientHandlers[i] != null  && clientHandlers[i].getRemoteRd().status == RouterStatus.TWO_WAY && !clientHandlers[i].isConnectedWith(excludedIp)) {
         clientHandlers[i].propagate();
       }
     }
 
+  }
+
+  private boolean isConnected(int i) {
+    boolean isConnected = false;
+
+    if (ports[i] != null) {
+      String ip = ports[i].router2.simulatedIPAddress;
+      ClientHandler[] clientHandlers = server.getClientHandlers();
+      for (ClientHandler clientHandler: clientHandlers) {
+        if (clientHandler != null && clientHandler.getRemoteRd().simulatedIPAddress.equals(ip)) {
+          isConnected = true;
+          break;
+        }
+      }
+    }
+
+    return isConnected;
   }
   /*
    check if the local LSA is outdated

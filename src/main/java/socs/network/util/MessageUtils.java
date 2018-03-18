@@ -51,8 +51,9 @@ public class MessageUtils {
         try {
 
             outputStream.writeObject(message);
-            outputStream.flush();
             outputStream.reset();
+            outputStream.flush();
+
         } catch (Exception e) {
             e.printStackTrace();
         }

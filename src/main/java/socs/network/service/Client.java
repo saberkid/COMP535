@@ -26,7 +26,9 @@ public class Client implements Runnable{
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
 
-
+    public RouterDescription getRemoteRd() {
+        return remoteRd;
+    }
     public Thread getThreading() {
         return threading;
     }
