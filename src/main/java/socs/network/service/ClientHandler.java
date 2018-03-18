@@ -86,7 +86,7 @@ public class ClientHandler implements Runnable{
         }
 
     }
-    public void propagate(){
+    public synchronized void propagate(){
         SOSPFPacket message = MessageUtils.packMessage(SOSPFPacket.LSU, router.getRd(), remoteRd, router);
         MessageUtils.sendMessage(message, outputStream);
     }

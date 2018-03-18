@@ -83,7 +83,7 @@ public class Client implements Runnable{
         return remoteRd.getSimulatedIPAddress().equals(remoteIp);
     }
 
-    public void propagate(){
+    public synchronized void propagate(){
         SOSPFPacket message = MessageUtils.packMessage(SOSPFPacket.LSU, rd, remoteRd, router);
         MessageUtils.sendMessage(message, outputStream);
     }
