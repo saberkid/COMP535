@@ -108,6 +108,33 @@ public class Router {
   private void processDisconnect(short portNumber) {
 
   }
+  
+  public void disconnect(short portNumber, short type) {
+	  if (portNumber < 0) {
+		  return;
+	  }
+	  
+	  Link link = ports[portNumber];
+	  if (link==null) {
+		  System.out.println("No router is connecting to this port.");
+		  return;
+	  }
+	  
+	  RouterDescription neighborRd = link.router1.simulatedIPAddress.equals(rd.simulatedIPAddress) ? link.router2:link.router1;
+	  String neighborIp = neighborRd.getProcessIPAddress();
+	  
+
+//	  for(int i = 0; i < clients.length; ++i) {
+//		  if(client[i] != null) {
+//		  }
+//	  }
+	  
+
+  }
+  
+  public void disconnect(String ip, short type) {
+	  
+  }
 
   /**
    * attach the link to the remote service, which is identified by the given simulated ip;
@@ -191,7 +218,6 @@ public class Router {
       if (neighborStatus == TWO_WAY){
         System.out.println("IP Address of the neighbor" + (i+1) + ": " + neighborRd.getSimulatedIPAddress());
       }
-
     }
   }
 

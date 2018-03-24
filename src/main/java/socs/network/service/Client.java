@@ -25,12 +25,19 @@ public class Client implements Runnable{
     private Socket clientSocket;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
+    
+    private HeartBeatClient heartbeat;
+    private TTLClient ttl;
 
     public RouterDescription getRemoteRd() {
         return remoteRd;
     }
     public Thread getThreading() {
         return threading;
+    }
+    
+    public Router getRouter() {
+    	return router;
     }
 
     public Client(Router router, RouterDescription remoteRd, Link link) {
@@ -58,12 +65,20 @@ public class Client implements Runnable{
             remoteRd.setStatus(RouterStatus.TWO_WAY);
             messageHello = MessageUtils.packMessage(SOSPFPacket.HELLO, rd, remoteRd, router);
             MessageUtils.sendMessage(messageHello, outputStream);
+            
+            heartbeat = new HeartBeatClient(this);
+            heartbeat.start();
+            ttl = new TTLClient(this);
+            ttl.start();
 
             while (true) {
                 receivedPacket = MessageUtils.receivePacket(inputStream);
 
                 switch (receivedPacket.sospfType) {
-
+	                case SOSPFPacket.HELLO: {
+	            		ttl.restart();
+	            		break;
+	            	}
                     case SOSPFPacket.LSU: {
                         //System.out.printf("received lsu from"+receivedPacket.srcIP);
                         router.synchronizeAndPropagate(receivedPacket.lsaArray, receivedPacket.lsuStarter, receivedPacket.srcIP);
@@ -86,5 +101,10 @@ public class Client implements Runnable{
     public synchronized void propagate(){
         SOSPFPacket message = MessageUtils.packMessage(SOSPFPacket.LSU, rd, remoteRd, router);
         MessageUtils.sendMessage(message, outputStream);
+    }
+    
+    public void sendMessage(short messageType) {
+    	SOSPFPacket message = MessageUtils.packMessage(messageType, rd, remoteRd, router);
+    	MessageUtils.sendMessage(message, outputStream);
     }
 }

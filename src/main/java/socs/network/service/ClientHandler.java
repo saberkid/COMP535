@@ -19,6 +19,9 @@ public class ClientHandler implements Runnable{
     private Thread threading;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
+    
+    HeartBeatServer heartbeat;
+    TTLServer ttl;
 
 
 
@@ -30,6 +33,10 @@ public class ClientHandler implements Runnable{
 
     public RouterDescription getRemoteRd() {
         return remoteRd;
+    }
+    
+    public Router getRouter() {
+    	return router;
     }
 
     public ClientHandler(Socket clientSocket, Router router) {
@@ -48,6 +55,7 @@ public class ClientHandler implements Runnable{
                 SOSPFPacket receivedPacket = MessageUtils.receivePacket(inputStream);
                 switch (receivedPacket.sospfType){
                     case SOSPFPacket.HELLO:
+                    	if (ttl == null) {
                         if (remoteRd == null){
                             remoteRd = new RouterDescription(receivedPacket.srcProcessIP, receivedPacket.srcProcessPort, receivedPacket.srcIP);
                             remoteRd.setStatus(RouterStatus.INIT);
@@ -67,7 +75,15 @@ public class ClientHandler implements Runnable{
                             /*SOSPFPacket outMessage = MessageUtils.packMessage(SOSPFPacket.LSU, router.getRd(), remoteRd, router );
                             MessageUtils.sendMessage(outMessage, outputStream);*/
                             router.propagateLspToNbr(router.getRd().getSimulatedIPAddress(), null);
+                            
+                            heartbeat = new HeartBeatServer(this);
+                            heartbeat.start();
+                            ttl = new TTLServer(this);
+                            ttl.start();
                         }
+                    	}else {
+                    		ttl.restart();
+                    	}
                         break;
                     case SOSPFPacket.LSU: {
                         //synchronize LSD and propagate
@@ -89,6 +105,11 @@ public class ClientHandler implements Runnable{
     public synchronized void propagate(){
         SOSPFPacket message = MessageUtils.packMessage(SOSPFPacket.LSU, router.getRd(), remoteRd, router);
         MessageUtils.sendMessage(message, outputStream);
+    }
+    
+    public void sendMessage(short messageType) {
+    	SOSPFPacket message = MessageUtils.packMessage(messageType, router.getRd(), remoteRd, router);
+    	MessageUtils.sendMessage(message, outputStream);
     }
 
     public boolean isConnectedWith(String remoteIp) {

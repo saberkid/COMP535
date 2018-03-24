@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SOSPFPacket implements Serializable {
   public final static short HELLO = 0;
   public final static short LSU = 1;
+  public final static short DISCONNECT = 3;
+  public final static short ANNIHILATE = 4;
   //for inter-process communication
   public String srcProcessIP;
   public short srcProcessPort;
