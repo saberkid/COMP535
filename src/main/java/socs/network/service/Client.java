@@ -80,8 +80,8 @@ public class Client implements Runnable{
 	            		break;
 	            	}
                     case SOSPFPacket.LSU: {
-                        //System.out.printf("received lsu from"+receivedPacket.srcIP);
-                        router.synchronizeAndPropagate(receivedPacket.lsaArray, receivedPacket.lsuStarter, receivedPacket.srcIP);
+
+                        router.synchronizeAndPropagate(receivedPacket.lsaArray,  receivedPacket.srcIP);
                         break;
                     }
                     default:

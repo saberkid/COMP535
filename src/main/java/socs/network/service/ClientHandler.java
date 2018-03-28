@@ -74,7 +74,7 @@ public class ClientHandler implements Runnable{
                             //  send LDU to all neighbours
                             /*SOSPFPacket outMessage = MessageUtils.packMessage(SOSPFPacket.LSU, router.getRd(), remoteRd, router );
                             MessageUtils.sendMessage(outMessage, outputStream);*/
-                            router.propagateLspToNbr(router.getRd().getSimulatedIPAddress(), null);
+                            router.propagateLspToNbr("");
                             
                             heartbeat = new HeartBeatServer(this);
                             heartbeat.start();
@@ -87,7 +87,7 @@ public class ClientHandler implements Runnable{
                         break;
                     case SOSPFPacket.LSU: {
                         //synchronize LSD and propagate
-                        router.synchronizeAndPropagate(receivedPacket.lsaArray, receivedPacket.lsuStarter, receivedPacket.srcIP);
+                        router.synchronizeAndPropagate(receivedPacket.lsaArray, receivedPacket.srcIP);
                         break;
                     }
                     default:

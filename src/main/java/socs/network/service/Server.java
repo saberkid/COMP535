@@ -65,8 +65,8 @@ public class Server implements Runnable{
 
     private int getFreePortNumber(){
         int port = -1;
-        for (int i = 0; i < clientHandlers.length; ++i) {
-            if (clientHandlers[i] == null) {
+        for (int i = 0; i < router.getPorts().length; ++i) {
+            if (router.getPorts()[i] == null) {
                 port = i;
                 break;
             }
