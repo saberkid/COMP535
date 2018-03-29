@@ -29,7 +29,7 @@ public class TTLClient extends TTL {
 			timer.cancel();
 			String remoteIp = client.getRemoteRd().getSimulatedIPAddress();
 			System.out.println("No heartbeat from " + remoteIp + "... Disconnecting...");
-			client.getRouter().disconnect(remoteIp, SOSPFPacket.ANNIHILATE);
+			client.getRouter().disconnect(remoteIp);
 			this.cancel();
 		}
 	}

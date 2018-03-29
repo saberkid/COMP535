@@ -165,8 +165,42 @@ public class Router {
 
   }
 
-  public void disconnect(String ip, short type) {
+  public void disconnect(String ip) {
+	  short portNumber = getPortNumber(ip);
 	  
+	  if (portNumber < 0 || portNumber >= ports.length) {
+	        System.out.println("Invalid port number.");
+			  return;
+		  }
+		  
+		  Link link = ports[portNumber];
+		  if (link==null) {
+			  System.out.println("No router is connecting to this port.");
+			  return;
+		  }
+		  
+		  RouterDescription neighborRd = link.router1.simulatedIPAddress.equals(rd.simulatedIPAddress) ? link.router2:link.router1;
+		  String neighborIp = neighborRd.getSimulatedIPAddress();
+
+		  //  remove link
+		  removeLink(neighborIp, portNumber);
+		  // propagate to neighbours
+	      propagateLspToNbr("");
+	  
+  }
+  
+  private short getPortNumber(String ip) {
+	  short portNumber = -1;
+	  for (short i = 0; i < ports.length; ++i) {
+		  Link link = ports[i];
+		  if (link != null) {
+			  if (link.router1.getSimulatedIPAddress().equals(ip) || link.router2.getSimulatedIPAddress().equals(ip)) {
+				  portNumber = i;
+				  break;
+			  }
+		  }
+	  }
+	  return portNumber;
   }
 
   /**

@@ -27,7 +27,7 @@ public class TTLServer extends TTL{
 		@Override
 		public void run() {
 			timer.cancel();
-			ch.getRouter().disconnect(ch.getRemoteRd().getSimulatedIPAddress(), SOSPFPacket.ANNIHILATE);
+			ch.getRouter().disconnect(ch.getRemoteRd().getSimulatedIPAddress());
 			this.cancel();
 		}
 	}
