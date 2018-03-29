@@ -227,7 +227,17 @@ public class Router {
    */
   private void processConnect(String processIP, short processPort,
                               String simulatedIP, short weight) {
-
+	  RouterDescription attachedRouterDescription = new RouterDescription(processIP, processPort, simulatedIP);
+	  Link link = new Link(rd, attachedRouterDescription, weight);
+	  for (int i = 0; i < ports.length; ++i) {
+	      if (ports[i] == null) {
+	        ports[i] = link;
+	        if (!isConnected(i)) {
+	        	startConnection(i);
+	        }
+//	        return true;
+	      }
+	  }
   }
 
   /**
