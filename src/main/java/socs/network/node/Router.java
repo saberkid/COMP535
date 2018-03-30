@@ -139,30 +139,35 @@ public class Router {
   }
   public  void removeLink(String neighbourIp, short portNumber){
 
-    // remove threads
-    ports[portNumber] = null;
-    clients[portNumber] = null;
-    this.server.getClientHandlers()[portNumber] = null;
-
-    synchronized(lsa_lock){
-      lsd._store.remove(neighbourIp); //remove neighbour's LSA
-
-      LSA localLsa = lsd._store.get(this.rd.simulatedIPAddress); // remove link from local LSA
-      for (int i = 0; i < localLsa.links.size(); ++i) {
-        LinkDescription link = localLsa.links.get(i);
-        if (link.linkID.equals(neighbourIp)) {
-          localLsa.links.remove(i);
-          localLsa.lsaSeqNumber ++;
-          System.out.println(localLsa.links);
-
-          break;
-
-        }
+      // remove threads
+      ports[portNumber] = null;
+      if (clients[portNumber] != null){
+          clients[portNumber].getHeartbeat().kill();
+          clients[portNumber].getTtl().kill();
+          clients[portNumber] = null;
       }
-    }
+      if (this.server.getClientHandlers()[portNumber] != null){
+          this.server.getClientHandlers()[portNumber].getHeartbeat().kill();
+          this.server.getClientHandlers()[portNumber].getTtl().kill();
+          this.server.getClientHandlers()[portNumber] = null;
+      }
 
+      synchronized(lsa_lock){
+          lsd._store.remove(neighbourIp); //remove neighbour's LSA
 
+          LSA localLsa = lsd._store.get(this.rd.simulatedIPAddress); // remove link from local LSA
+          for (int i = 0; i < localLsa.links.size(); ++i) {
+              LinkDescription link = localLsa.links.get(i);
+              if (link.linkID.equals(neighbourIp)) {
+                  localLsa.links.remove(i);
+                  localLsa.lsaSeqNumber ++;
+                  //System.out.println(localLsa.links);
 
+                  break;
+
+              }
+          }
+      }
   }
 
   public void disconnect(String ip) {

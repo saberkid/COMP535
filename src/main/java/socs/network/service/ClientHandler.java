@@ -24,7 +24,8 @@ public class ClientHandler implements Runnable{
     TTLServer ttl;
 
 
-
+    public HeartBeat getHeartbeat() { return heartbeat; }
+    public TTL getTtl() { return ttl; }
     private RouterDescription remoteRd;
 
     public Thread getThreading() {

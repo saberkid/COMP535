@@ -25,10 +25,14 @@ public class Client implements Runnable{
     private Socket clientSocket;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
-    
+
+
+
     private HeartBeatClient heartbeat;
     private TTLClient ttl;
 
+    public HeartBeat getHeartbeat() { return heartbeat; }
+    public TTL getTtl() { return ttl; }
     public RouterDescription getRemoteRd() {
         return remoteRd;
     }
