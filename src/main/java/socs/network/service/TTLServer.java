@@ -30,7 +30,7 @@ public class TTLServer extends TTL{
 			timer.cancel();
 			String remoteIp = ch.getRemoteRd().getSimulatedIPAddress();
 			System.out.println("No heartbeat from " + remoteIp + "... Disconnecting...");
-			ch.getRouter().disconnect(ch.getRemoteRd().getSimulatedIPAddress());
+			ch.getRouter().disconnect(remoteIp);
 			this.cancel();
 		}
 	}

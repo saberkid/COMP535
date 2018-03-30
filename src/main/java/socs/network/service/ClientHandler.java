@@ -70,7 +70,7 @@ public class ClientHandler implements Runnable{
                             //router.synchronize(receivedPacket.lsaArray);
                             short weight = MessageUtils.getLinkWeight(router, receivedPacket);
                             router.lsaUpdate(remoteRd, weight);
-                            addRouterLink(remoteRd, weight);
+                            router.addLinkForHandler(remoteRd, weight, this);
 
                             //  send LDU to all neighbours
                             /*SOSPFPacket outMessage = MessageUtils.packMessage(SOSPFPacket.LSU, router.getRd(), remoteRd, router );
@@ -119,15 +119,5 @@ public class ClientHandler implements Runnable{
         return remoteRd.getSimulatedIPAddress().equals(remoteIp);
     }
 
-    private boolean addRouterLink(RouterDescription routerAttachedDescription, short weight) {
-        Link link = new Link(router.getRd(), routerAttachedDescription, weight);
 
-        boolean isLinkAdded = router.addLink(link);
-        if (!isLinkAdded) {
-            System.out.println("[ERROR] Router ports full!.");
-            return false;
-        }
-
-        return true;
-    }
 }

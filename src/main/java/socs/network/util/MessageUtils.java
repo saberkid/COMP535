@@ -47,7 +47,7 @@ public class MessageUtils {
                 messageType = "UNKNOWN MESSAGE";
 
         }
-        System.out.println("sending " + messageType + " to " + message.dstIP + ";");
+        //System.out.println("sending " + messageType + " to " + message.dstIP + ";");
         try {
 
             outputStream.writeObject(message);
@@ -111,7 +111,7 @@ public class MessageUtils {
 
         }
 
-        System.out.println(receivedMessage);
+        //System.out.println(receivedMessage);
 
         return receivedPacket;
     }

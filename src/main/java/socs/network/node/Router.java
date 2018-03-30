@@ -33,10 +33,11 @@ public class Router {
   }
 
   //assuming that all routers are with 4 ports
-  Link[] ports = new Link[4];
+  volatile Link[] ports = new Link[4];
   Client[] clients = new Client[4];
   boolean isStarted = false;
   final Object lsa_lock = new Object();
+  final Object port_lock = new Object();
 
 
 
@@ -61,6 +62,22 @@ public class Router {
       }
     }
     return false;
+  }
+
+  public void addLinkForHandler(RouterDescription routerAttachedDescription, short weight, ClientHandler ch){
+    Link link = new Link(this.getRd(), routerAttachedDescription, weight);
+    ClientHandler[] chs = server.getClientHandlers();
+    int portNumber = -1;
+    for (int i=0; i<chs.length; i++){
+      if (chs[i] == ch){
+        portNumber = i;
+        break;
+      }
+    }
+
+    if (portNumber != -1 ){
+      ports[portNumber] = link;
+    }
   }
   /**
    * output the shortest path to the given destination ip
@@ -140,7 +157,7 @@ public class Router {
   public  void removeLink(String neighbourIp, short portNumber){
 
       // remove threads
-      ports[portNumber] = null;
+
       if (clients[portNumber] != null){
           clients[portNumber].getHeartbeat().kill();
           clients[portNumber].getTtl().kill();
@@ -153,6 +170,7 @@ public class Router {
           this.server.getClientHandlers()[portNumber].exit = true;
           this.server.getClientHandlers()[portNumber] = null;
       }
+    ports[portNumber] = null;
 
       synchronized(lsa_lock){
           lsd._store.remove(neighbourIp); //remove neighbour's LSA
@@ -436,9 +454,12 @@ public class Router {
         } else if (command.equals("neighbors")) {
           //output neighbors
           processNeighbors();
-        } else {
-          //invalid command
+        } else if (command.equals("exit")){
           break;
+        }
+        else {
+          System.out.println("invalid command");
+          //break;
         }
         System.out.print(">> ");
         command = br.readLine();

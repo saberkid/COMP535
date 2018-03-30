@@ -1,5 +1,6 @@
 package socs.network.service;
 
+import socs.network.node.Link;
 import socs.network.node.Router;
 
 import java.io.IOException;
@@ -46,6 +47,7 @@ public class Server implements Runnable{
                     Socket server = serverSocket.accept();
                     ClientHandler clientHandler = new ClientHandler(server, this.router);
                     clientHandlers[freePortNumber] = clientHandler;
+                    router.getPorts()[freePortNumber] = new Link(); // occupy the port first
                     clientHandler.getThreading().start();
 
                 }

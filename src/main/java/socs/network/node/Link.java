@@ -6,6 +6,10 @@ public class Link {
   RouterDescription router2;
   short weight;
 
+  public Link() {
+
+  }
+
   public short getWeight() {
     return weight;
   }
