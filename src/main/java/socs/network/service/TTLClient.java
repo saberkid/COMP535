@@ -19,6 +19,7 @@ public class TTLClient extends TTL {
 	
 	public void restart() {
 		timer.cancel();
+		timer.purge();
 		timer = new Timer();
 		timer.schedule(new RemindTask(), delay*1000);
 	}

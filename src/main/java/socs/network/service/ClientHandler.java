@@ -22,7 +22,7 @@ public class ClientHandler implements Runnable{
     
     HeartBeatServer heartbeat;
     TTLServer ttl;
-
+    public volatile boolean exit = false;
 
     public HeartBeat getHeartbeat() { return heartbeat; }
     public TTL getTtl() { return ttl; }
@@ -83,7 +83,8 @@ public class ClientHandler implements Runnable{
                             ttl.start();
                         }
                     	}else {
-                    		ttl.restart();
+                            if (!exit)
+                                ttl.restart();
                     	}
                         break;
                     case SOSPFPacket.LSU: {
@@ -99,6 +100,7 @@ public class ClientHandler implements Runnable{
             }
         }
         catch (Exception e){
+
 
         }
 

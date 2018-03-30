@@ -30,6 +30,7 @@ public class Client implements Runnable{
 
     private HeartBeatClient heartbeat;
     private TTLClient ttl;
+    public volatile boolean exit = false;
 
     public HeartBeat getHeartbeat() { return heartbeat; }
     public TTL getTtl() { return ttl; }
@@ -80,7 +81,7 @@ public class Client implements Runnable{
 
                 switch (receivedPacket.sospfType) {
 	                case SOSPFPacket.HELLO: {
-	            		ttl.restart();
+	                    if (!exit) ttl.restart();
 	            		break;
 	            	}
                     case SOSPFPacket.LSU: {

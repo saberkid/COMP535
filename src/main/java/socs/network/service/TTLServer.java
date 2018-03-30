@@ -19,6 +19,7 @@ public class TTLServer extends TTL{
 	
 	public void restart() {
 		timer.cancel();
+		timer.purge();
 		timer = new Timer();
 		timer.schedule(new RemindTask(), delay*1000);
 	}
@@ -27,6 +28,8 @@ public class TTLServer extends TTL{
 		@Override
 		public void run() {
 			timer.cancel();
+			String remoteIp = ch.getRemoteRd().getSimulatedIPAddress();
+			System.out.println("No heartbeat from " + remoteIp + "... Disconnecting...");
 			ch.getRouter().disconnect(ch.getRemoteRd().getSimulatedIPAddress());
 			this.cancel();
 		}

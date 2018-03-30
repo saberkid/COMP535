@@ -144,11 +144,13 @@ public class Router {
       if (clients[portNumber] != null){
           clients[portNumber].getHeartbeat().kill();
           clients[portNumber].getTtl().kill();
+          clients[portNumber].exit = true;
           clients[portNumber] = null;
       }
       if (this.server.getClientHandlers()[portNumber] != null){
           this.server.getClientHandlers()[portNumber].getHeartbeat().kill();
           this.server.getClientHandlers()[portNumber].getTtl().kill();
+          this.server.getClientHandlers()[portNumber].exit = true;
           this.server.getClientHandlers()[portNumber] = null;
       }
 
@@ -274,6 +276,7 @@ public class Router {
 	        if (!isConnected(i)) {
 	        	startConnection(i);
 	        }
+	        break;
 //	        return true;
 	      }
 	  }
@@ -426,7 +429,7 @@ public class Router {
                   cmdLine[3], Short.parseShort(cmdLine[4]));
         } else if (command.equals("start")) {
           processStart();
-        } else if (command.equals("connect ")) {
+        } else if (command.startsWith("connect ")) {
           String[] cmdLine = command.split(" ");
           processConnect(cmdLine[1], Short.parseShort(cmdLine[2]),
                   cmdLine[3], Short.parseShort(cmdLine[4]));
