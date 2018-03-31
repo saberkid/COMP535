@@ -15,24 +15,6 @@ import java.util.Optional;
  *
  */
 public class MessageUtils {
-    /*public static String resolveMessage(SOSPFPacket messageReceived){
-        String messageResolved;
-        String messageType;
-
-        switch ( messageReceived.sospfType){
-            case SOSPFPacket.HELLO:
-                messageType = "HELLO";
-                break;
-            case SOSPFPacket.LSU:
-                messageType = "LSU";
-                break;
-            default:
-                messageType = "UNKNOWN MESSAGE";
-
-        }
-        messageResolved = "received " + messageType + " from " + messageReceived.srcIP+ ";";
-        return messageResolved;
-    }*/
 
     public static void sendMessage(SOSPFPacket message, ObjectOutputStream outputStream) {
         String messageType = "NULL";
@@ -84,6 +66,12 @@ public class MessageUtils {
         router.getLsd().get_store().forEach((routerIp, lsa) -> message.lsaArray.add(lsa));
         message.lsuStarter = type == SOSPFPacket.LSU ? message.srcIP : null;
         return message;
+    }
+    public static SOSPFPacket packMessage(short type, RouterDescription local, RouterDescription remote, Router router, String annihilatedIp, String victimIp ){
+        SOSPFPacket message = packMessage(type, local, remote, router);
+        message.annihilatedIp = annihilatedIp;
+        message.victimIp = victimIp;
+        return  message;
     }
 
     public static SOSPFPacket receivePacket(ObjectInputStream inputStream) {

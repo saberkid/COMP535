@@ -10,8 +10,6 @@ import socs.network.util.Configuration;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 import socs.network.util.WeightedGraph;
 import socs.network.util.WeightedGraph.*;
@@ -151,9 +149,12 @@ public class Router {
 	  //  remove link
 	  removeLink(neighborIp, portNumber);
 	  // propagate to neighbours
-      propagateLspToNbr("");
+      propagateANNToNbr("", neighborIp, rd.simulatedIPAddress);
 
   }
+
+
+
   public  void removeLink(String neighbourIp, short portNumber){
 
       // remove threads
@@ -173,7 +174,7 @@ public class Router {
     ports[portNumber] = null;
 
       synchronized(lsa_lock){
-          LSA neighbourLSA = lsd._store.get(neighbourIp); //remove link in neighbour's LSA
+          /*LSA neighbourLSA = lsd._store.get(neighbourIp); //remove link in neighbour's LSA
         for (int i = 0; i < neighbourLSA.links.size(); ++i) {
           LinkDescription link = neighbourLSA.links.get(i);
           if (link.linkID.equals(this.rd.simulatedIPAddress)) {
@@ -182,7 +183,8 @@ public class Router {
             //System.out.println(localLsa.links);
             break;
           }
-        }
+        }*/
+          lsd._store.remove(neighbourIp);
 
           LSA localLsa = lsd._store.get(this.rd.simulatedIPAddress); // remove link from local LSA
           for (int i = 0; i < localLsa.links.size(); ++i) {
@@ -217,7 +219,7 @@ public class Router {
 		  //  remove link
 		  removeLink(neighborIp, portNumber);
 		  // propagate to neighbours
-	      propagateLspToNbr("");
+	      propagateANNToNbr("", neighborIp, rd.simulatedIPAddress);
 	  
   }
   
@@ -386,6 +388,41 @@ public class Router {
 
   }
   /*
+   synchronize/ANN and propagate the messages
+    */
+  public void synchronizeANNAndPropagate(ArrayList<LSA> lsaArray, String excludedIp, String annihilatedIp, String victimIp) {
+
+    boolean updated = false;
+    synchronized (lsa_lock) {
+      for (LSA lsa : lsaArray) {
+        if (isLocalLsaOutdated(lsa)) {
+          updated = true;
+          lsd._store.put(lsa.linkStateID, lsa);
+        }
+
+      }
+
+      LSA annLSA = lsd._store.get(annihilatedIp);
+      if (annLSA != null){
+        for (int i = 0; i < annLSA.links.size(); ++i) {
+          LinkDescription link = annLSA.links.get(i);
+          if (link.linkID.equals(victimIp)) {
+            annLSA.links.remove(i);
+            //localLsa.lsaSeqNumber ++;
+            //System.out.println(localLsa.links);
+            break;
+          }
+        }
+      }
+      if(updated) propagateANNToNbr(excludedIp, annihilatedIp, victimIp);
+
+    }
+
+
+
+
+  }
+  /*
    propagate with exceptions  && !clients[i].isConnectedWith(lduStarter)   && !clientHandlers[i].isConnectedWith(lduStarter)
     */
   public void propagateLspToNbr( String excludedIp){
@@ -401,6 +438,21 @@ public class Router {
       }
     }
 
+  }
+
+  private void propagateANNToNbr(String excludedIp, String annihilatedIp, String victimIp) {
+
+    for (int i = 0; i < clients.length; ++i) {
+      if (clients[i] != null  &&  clients[i].getRemoteRd().status == RouterStatus.TWO_WAY && !clients[i].isConnectedWith(excludedIp)) {
+        clients[i].propagateANN(annihilatedIp, victimIp);
+      }
+    }
+    ClientHandler[] clientHandlers = server.getClientHandlers();
+    for (int i = 0; i < clientHandlers.length; ++i) {
+      if (clientHandlers[i] != null  && clientHandlers[i].getRemoteRd().status == RouterStatus.TWO_WAY  && !clientHandlers[i].isConnectedWith(excludedIp)) {
+        clientHandlers[i].propagateANN(annihilatedIp, victimIp);
+      }
+    }
   }
 
   private boolean isConnected(int i) {

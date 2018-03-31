@@ -8,8 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SOSPFPacket implements Serializable {
   public final static short HELLO = 0;
   public final static short LSU = 1;
-  public final static short DISCONNECT = 3;
-  public final static short ANNIHILATE = 4;
+  public final static short ANNIHILATE = 2;
   //for inter-process communication
   public String srcProcessIP;
   public short srcProcessPort;
@@ -30,5 +29,6 @@ public class SOSPFPacket implements Serializable {
   //used by LSAUPDATE
   public ArrayList<LSA> lsaArray = new ArrayList<>();
   public String lsuStarter = null;
-
+  public String annihilatedIp = null;
+  public String victimIp = null;
 }

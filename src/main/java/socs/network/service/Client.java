@@ -78,22 +78,25 @@ public class Client implements Runnable{
 
             while (true) {
                 receivedPacket = MessageUtils.receivePacket(inputStream);
-
+                if(receivedPacket == null) break;
                 switch (receivedPacket.sospfType) {
 	                case SOSPFPacket.HELLO: {
 	                    if (!exit) ttl.restart();
 	            		break;
 	            	}
                     case SOSPFPacket.LSU: {
-
                         router.synchronizeAndPropagate(receivedPacket.lsaArray,  receivedPacket.srcIP);
+                        break;
+                    }
+                    case SOSPFPacket.ANNIHILATE:{
+                        router.synchronizeANNAndPropagate(receivedPacket.lsaArray, receivedPacket.srcIP, receivedPacket.annihilatedIp, receivedPacket.victimIp);
                         break;
                     }
                     default:
                     }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
 
@@ -105,6 +108,10 @@ public class Client implements Runnable{
 
     public synchronized void propagate(){
         SOSPFPacket message = MessageUtils.packMessage(SOSPFPacket.LSU, rd, remoteRd, router);
+        MessageUtils.sendMessage(message, outputStream);
+    }
+    public synchronized void propagateANN(String annihilatedIp, String victimIp){
+        SOSPFPacket message = MessageUtils.packMessage(SOSPFPacket.ANNIHILATE, rd, remoteRd, router, annihilatedIp, victimIp);
         MessageUtils.sendMessage(message, outputStream);
     }
     

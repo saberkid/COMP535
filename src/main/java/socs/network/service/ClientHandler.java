@@ -1,6 +1,5 @@
 package socs.network.service;
 import socs.network.message.SOSPFPacket;
-import socs.network.node.Link;
 import socs.network.node.Router;
 import socs.network.node.RouterDescription;
 import socs.network.node.RouterStatus;
@@ -54,6 +53,7 @@ public class ClientHandler implements Runnable{
 
             while (true){
                 SOSPFPacket receivedPacket = MessageUtils.receivePacket(inputStream);
+                if(receivedPacket == null) break;
                 switch (receivedPacket.sospfType){
                     case SOSPFPacket.HELLO:
                     	if (ttl == null) {
@@ -92,6 +92,10 @@ public class ClientHandler implements Runnable{
                         router.synchronizeAndPropagate(receivedPacket.lsaArray, receivedPacket.srcIP);
                         break;
                     }
+                    case SOSPFPacket.ANNIHILATE:{
+                        router.synchronizeANNAndPropagate(receivedPacket.lsaArray, receivedPacket.srcIP, receivedPacket.annihilatedIp, receivedPacket.victimIp);
+                        break;
+                    }
                     default:
                         System.out.println("UNKNOWN MESSAGE RECEIVED");
 
@@ -107,6 +111,10 @@ public class ClientHandler implements Runnable{
     }
     public synchronized void propagate(){
         SOSPFPacket message = MessageUtils.packMessage(SOSPFPacket.LSU, router.getRd(), remoteRd, router);
+        MessageUtils.sendMessage(message, outputStream);
+    }
+    public synchronized void propagateANN(String annihilatedIp, String victimIp){
+        SOSPFPacket message = MessageUtils.packMessage(SOSPFPacket.ANNIHILATE, router.getRd(), remoteRd, router, annihilatedIp, victimIp);
         MessageUtils.sendMessage(message, outputStream);
     }
     
