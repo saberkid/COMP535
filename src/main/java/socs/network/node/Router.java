@@ -174,7 +174,7 @@ public class Router {
     ports[portNumber] = null;
 
       synchronized(lsa_lock){
-          /*LSA neighbourLSA = lsd._store.get(neighbourIp); //remove link in neighbour's LSA
+          LSA neighbourLSA = lsd._store.get(neighbourIp); //remove link in neighbour's LSA
         for (int i = 0; i < neighbourLSA.links.size(); ++i) {
           LinkDescription link = neighbourLSA.links.get(i);
           if (link.linkID.equals(this.rd.simulatedIPAddress)) {
@@ -183,8 +183,8 @@ public class Router {
             //System.out.println(localLsa.links);
             break;
           }
-        }*/
-          lsd._store.remove(neighbourIp);
+        }
+          //lsd._store.remove(neighbourIp);
 
           LSA localLsa = lsd._store.get(this.rd.simulatedIPAddress); // remove link from local LSA
           for (int i = 0; i < localLsa.links.size(); ++i) {
